@@ -26,6 +26,11 @@
 	<Content Include="ML\PatientRiskModel.zip">
 		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	</Content>
+
+	  <Content Update="wwwroot\**">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+
   </ItemGroup>
 
 </Project>

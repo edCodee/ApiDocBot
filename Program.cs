@@ -343,6 +343,9 @@ builder.WebHost.ConfigureKestrel(options =>
     options.Limits.MaxRequestBodySize = builder.Configuration.GetValue<long>("UploadLimits:MaxBody", 200_000_000);
 });
 
+//Escuchar en cualquier puerto como lo exige Azure
+builder.WebHost.UseUrls("http://+:80");
+
 #endregion
 
 var app = builder.Build();
@@ -373,15 +376,22 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 // 4.6 Swagger solo en desarrollo
-if (app.Environment.IsDevelopment())
+//if (app.Environment.IsDevelopment())
+//{
+//    app.UseSwagger();
+//    app.UseSwaggerUI(c =>
+//    {
+//        c.SwaggerEndpoint("/swagger/v1/swagger.json", "API DocBot v1");
+//        //c.RoutePrefix = string.Empty; // sirve swagger en la raíz
+//    });
+//}
+
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "API DocBot v1");
-        //c.RoutePrefix = string.Empty; // sirve swagger en la raíz
-    });
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "API DocBot v1");
+    c.RoutePrefix = string.Empty; // Esto hace que Swagger se sirva en la raíz "/"
+});
 
 // 4.7 Health Checks
 app.MapHealthChecks("/health");

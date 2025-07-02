@@ -32,7 +32,7 @@ namespace ApiDocBot.Controllers
             var userRoleDTOs = userRoles.Select(f => new UserRolReadDTO
             {
                 UserRoleUserSerial = f.userRole_userSerial,
-                UserRoleRoleSerial = f.userRole_userSerial,
+                UserRoleRoleSerial = f.userRole_roleSerial,
                 UserRoleAssignedAt = f.assigned_at ?? DateTime.MinValue
             });
             return Ok(userRoleDTOs);

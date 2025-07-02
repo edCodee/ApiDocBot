@@ -97,11 +97,11 @@
               "type": "Microsoft.ApiManagement/service/apis",
               "name": "ApiDocBotapi/ApiDocBot",
               "properties": {
-                "displayName": "ApiDocBot",
+                "displayName": "API DocBot",
                 "apiRevision": "1",
-                "description": null,
+                "description": "API para gestionar documentos y bots",
                 "subscriptionRequired": true,
-                "serviceUrl": null,
+                "serviceUrl": "https://apidocbot20250701084725-ftdncfcyajb0fwcf.canadacentral-01.azurewebsites.net",
                 "path": "",
                 "protocols": [
                   "https"

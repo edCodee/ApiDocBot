@@ -21,7 +21,7 @@
     },
     "resourceName": {
       "type": "string",
-      "defaultValue": "ApiDocBot20250701042347",
+      "defaultValue": "ApiDocBot20250701094126",
       "metadata": {
         "description": "Name of the main resource to be created by this template."
       }

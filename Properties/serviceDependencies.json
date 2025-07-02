@@ -1,11 +1,28 @@
 {
   "dependencies": {
+    "mssql4": {
+      "ignored": "true",
+      "type": "mssql",
+      "connectionId": "ConnectionStrings:DefaultConnection"
+    },
+    "mssql1": {
+      "ignored": "true",
+      "type": "mssql",
+      "connectionId": "ConnectionStrings:DefaultConnection1",
+      "dynamicId": null
+    },
+    "mssql2": {
+      "ignored": "true",
+      "type": "mssql",
+      "connectionId": "ConnectionStrings:DefaultConnection2",
+      "dynamicId": null
+    },
     "apis1": {
       "type": "apis"
     },
-    "mssql1": {
+    "mssql3": {
       "type": "mssql",
-      "connectionId": "ConnectionStrings:DefaultConnection1",
+      "connectionId": "ConnectionStrings:DefaultConnection3",
       "dynamicId": null
     }
   }
