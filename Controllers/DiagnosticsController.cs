@@ -145,7 +145,8 @@ namespace ApiDocBot.Controllers
                     "Se recomienda evitar el uso excesivo de pantallas, establecer rutinas saludables y reforzar el acompañamiento familiar. " +
                     "En caso de observar signos de ansiedad, aislamiento o cambios de comportamiento, acudir inmediatamente a un profesional de salud mental.",
 
-                "Medio" =>
+                // CAMBIO AQUÍ: "Medio" debe ser "Moderado" para coincidir con la salida del modelo
+                "Moderado" => // Antes "Medio"
                     "Se ha detectado un nivel de riesgo moderado. Es recomendable realizar un seguimiento en el hogar mediante observación de rutinas, " +
                     "acompañamiento emocional y comunicación activa. Establezca límites sanos en el uso de pantallas y fomente actividades al aire libre o sociales. " +
                     "Si los síntomas persisten o aumentan, considere una evaluación psicológica preventiva.",
@@ -155,7 +156,11 @@ namespace ApiDocBot.Controllers
                     "Se recomienda mantener los buenos hábitos actuales, fomentar actividades recreativas, y continuar monitoreando periódicamente el bienestar emocional. " +
                     "Es importante mantener una comunicación abierta en el entorno familiar o escolar.",
 
-                _ =>
+                // CAMBIO AÑADIDO: Nueva entrada para el riesgo "No"
+                "No" =>
+                    "No se detectan señales de riesgo significativas. Se recomienda mantener un ambiente de apoyo y bienestar emocional, fomentar la comunicación abierta y las actividades saludables. Continuar monitoreando el desarrollo y comportamiento del paciente.",
+
+                _ => // En caso de un valor inesperado del modelo, que no debería ocurrir si las clases son fijas.
                     "No se pudo determinar una recomendación específica debido a un resultado no reconocido. Por favor, intente realizar nuevamente el diagnóstico o consulte con un profesional."
             };
 
