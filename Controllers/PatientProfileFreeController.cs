@@ -18,6 +18,39 @@ namespace ApiDocBot.Controllers
             _context = context;
         }
 
+        // GET: api/patientdiagnostic/{id}
+        [HttpGet("patientdiagnostic/{id}")]
+        public async Task<ActionResult<IEnumerable<PatientProfileFreeDiagnosis>>> GetPatientDiagnostic(int id)
+        {
+            var result = await (
+                from u in _context.user
+                join p in _context.patient_profile_free
+                    on u.user_serial equals p.patientProfileFree_userSerial
+                join d in _context.diagnostic_ml_free
+                    on p.patientProfileFree_id equals d.diagnosticMlFree_patientProfileFreeId
+                where p.patientProfileFree_id == id
+                select new PatientProfileFreeDiagnosis
+                {
+                    UserFirstName = u.user_firstName,
+                    UserLastName = u.user_lastName,
+                    PatientProfileFreeId = p.patientProfileFree_id,
+                    PatientProfileFreeFirstName = p.patientProfileFree_firstName,
+                    PatientProfileFreeLastName = p.patientProfileFree_lastName,
+                    PatientProfileFreeGender = p.patientProfileFree_gender,
+                    PatientProfileFreeBirthDate = p.patientProfileFree_birthDate,
+                    DiagnosticMlFreeRiskLevel = d.diagnosticMlFree_riskLevel,
+                    DiagnosticMlFreeRecommendations = d.diagnosticMlFree_recommendations,
+                    DiagnosticMlFreeNeedUrgentPsychologist = d.diagnosticMlFree_needUrgentPsychologist
+                }
+            ).ToListAsync();
+
+            if (!result.Any())
+                return NotFound($"No se encontró información para el ID {id}");
+
+            return Ok(result);
+        }
+
+
         // GET: api/patientprofilefreelist
         [HttpGet("patientprofilefreelist")]
         public async Task<ActionResult<IEnumerable<PatientProfileFreeListReadDTO>>> GetPatientProfileList()
