@@ -18,6 +18,26 @@ namespace ApiDocBot.Controllers
             _context = context;
         }
 
+        // GET: api/patientprofilefreelist
+        [HttpGet("patientprofilefreelist")]
+        public async Task<ActionResult<IEnumerable<PatientProfileFreeListReadDTO>>> GetPatientProfileList()
+        {
+            var patientList = await (
+                from u in _context.user
+                join p in _context.patient_profile_free
+                    on u.user_serial equals p.patientProfileFree_userSerial
+                select new PatientProfileFreeListReadDTO
+                {
+                    UserFirstName = u.user_firstName,
+                    UserLastName = u.user_lastName,
+                    PatientProfileFreeFirstName = p.patientProfileFree_firstName,
+                    PatientProfileFreeLastName = p.patientProfileFree_lastName
+                }
+            ).ToListAsync();
+
+            return Ok(patientList);
+        }
+
         //GET:api/patientprofilefree
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PatientProfileFreeReadDTO>>> GetPatientProfileFree()
