@@ -30,6 +30,7 @@ namespace ApiDocBot.Controllers
                 {
                     UserFirstName = u.user_firstName,
                     UserLastName = u.user_lastName,
+                    PatientProfileFreeId=p.patientProfileFree_id,
                     PatientProfileFreeFirstName = p.patientProfileFree_firstName,
                     PatientProfileFreeLastName = p.patientProfileFree_lastName
                 }

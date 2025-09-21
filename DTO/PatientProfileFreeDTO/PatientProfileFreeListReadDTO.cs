@@ -4,6 +4,7 @@
     {
         public string UserFirstName { get; set; } = string.Empty;
         public string UserLastName { get; set; } = string.Empty;
+        public int PatientProfileFreeId { get; set; }
         public string PatientProfileFreeFirstName { get; set; } = string.Empty;
         public string PatientProfileFreeLastName { get; set; } = string.Empty;
 
