@@ -17,6 +17,7 @@ namespace ApiDocBot.Controllers
         }
 
         //Get: api/patientindicatorevaluation   
+        [HttpGet]
         public async Task<ActionResult<IEnumerable<PatientIndicatorEvaluationReadDTO>>> GetPatientIndicatorEvaluation()
         {
             var indicatorEvaluation = await _context.patient_indicator_evaluation.ToListAsync();
