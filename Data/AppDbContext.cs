@@ -17,6 +17,7 @@ namespace ApiDocBot.Data
         public DbSet<DiagnosticMlFreeModel> diagnostic_ml_free { get; set; }
         public DbSet<IndicatorCatalog> indicator_catalog { get; set; }
         public DbSet<PatientIndicatorEvaluationModel> patient_indicator_evaluation { get; set; }
+        public DbSet<DiagnosticMLMechanicalArmModel> diagnosticMl_mechanicalArm { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

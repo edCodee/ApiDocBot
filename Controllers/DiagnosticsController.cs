@@ -191,6 +191,9 @@ namespace ApiDocBot.Controllers
         }
 
 
+
+
+
         [Authorize]
         [HttpGet("diagnostics")]
         public async Task<ActionResult<IEnumerable<DiagnosticMlFreeReadDTO>>> GetMyDiagnostics()
