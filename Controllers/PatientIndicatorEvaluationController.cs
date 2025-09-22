@@ -1,5 +1,6 @@
 ﻿using ApiDocBot.Data;
 using ApiDocBot.DTO.PatientIndicatorEvaluationDTO;
+using ApiDocBot.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query.Internal;
@@ -32,6 +33,36 @@ namespace ApiDocBot.Controllers
                 PatientIndicatorEvaluationDate = f.patientIndicatorEvaluation_date
             });
             return Ok(indicatorEvaluationDTO);
+        }
+
+        // POST: api/patientindicatorevaluation
+        [HttpPost]
+        public async Task<ActionResult<PatientIndicatorEvaluationReadDTO>> CreatePatientIndicatorEvaluation(
+    [FromBody] PatientIndicatorEvaluationCreateDTO dto)
+        {
+            var entity = new PatientIndicatorEvaluationModel
+            {
+                patientIndicatorEvaluation_patientProfileFreeId = dto.PatientIndicatorEvaluationPatientProfileFreeId,
+                patientIndicatorEvaluation_indicatorCatalogId = dto.PatientIndicatorEvaluationIndicatorCatalogId,
+                patientIndicatorEvaluation_score = dto.PatientIndicatorEvaluationScore,
+                patientIndicatorEvaluation_observation = dto.PatientIndicatorEvaluationObservation ?? string.Empty,
+                patientIndicatorEvaluation_date = DateTime.Now
+            };
+
+            _context.patient_indicator_evaluation.Add(entity);
+            await _context.SaveChangesAsync();
+
+            var readDto = new PatientIndicatorEvaluationReadDTO
+            {
+                PatientIndicatorEvaluationId = entity.patientIndicatorEvaluation_id,
+                PatientIndicatorEvaluationPatientProfileFreeId = entity.patientIndicatorEvaluation_patientProfileFreeId,
+                PatientIndicatorEvaluationIndicatorCatalogId = entity.patientIndicatorEvaluation_indicatorCatalogId,
+                PatientIndicatorEvaluationScore = entity.patientIndicatorEvaluation_score,
+                PatientIndicatorEvaluationObservation = entity.patientIndicatorEvaluation_observation,
+                PatientIndicatorEvaluationDate = entity.patientIndicatorEvaluation_date
+            };
+
+            return CreatedAtAction(nameof(GetPatientIndicatorEvaluation), new { id = entity.patientIndicatorEvaluation_id }, readDto);
         }
     }
 }
