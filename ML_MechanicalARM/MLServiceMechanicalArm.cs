@@ -5,10 +5,10 @@ namespace ApiDocBot.ML_MechanicalARM
     public class MLServiceMechanicalArm
     {
         private readonly PredictionEngine<PatientDataMechanicalArm, PatientPredictionMechanicalArm> _predictionEngine;
-        
+
         public MLServiceMechanicalArm()
         {
-            var mlContext=new MLContext();
+            var mlContext = new MLContext();
 
             // obtener la ruta relativa desde donde se ejecuta la app
             var modelPath = Path.Combine(Directory.GetCurrentDirectory(), "ML_MechanicalARM", "PatientRiskModel_mechanicalarmV3.zip");
@@ -19,8 +19,16 @@ namespace ApiDocBot.ML_MechanicalARM
 
         public string PredictRiskMechanicalArm(PatientDataMechanicalArm dataMechanicalArm)
         {
-            var prediction=_predictionEngine.Predict(dataMechanicalArm);
-            return prediction.PredictedRiskLevel;
+            try
+            {
+                var prediction = _predictionEngine.Predict(dataMechanicalArm);
+                return prediction.PredictedRiskLevel;
+            }
+            catch (Exception ex)
+            {
+                // Aquí atrapamos la excepción real y la propagamos con más detalle
+                throw new InvalidOperationException($"Error en predicción ML: {ex.Message}", ex);
+            }
         }
     }
 }
