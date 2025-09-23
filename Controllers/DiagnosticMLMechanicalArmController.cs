@@ -1,4 +1,5 @@
 ﻿using ApiDocBot.Data;
+using ApiDocBot.DTO.DiagnosticMlFreeDTO;
 using ApiDocBot.DTO.DiagnosticMLMechanicalArmDTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -20,9 +21,9 @@ namespace ApiDocBot.Controllers
             _context = context;
         }
 
-        //Get: api/diagnosticmlmechanicalArmcontroller
+        //Get: api/diagnosticcontroller
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<DiagnosticMLMechanicalArmReadDTO>>> GetDiagnosticMLMechanicalArm()
+        public async Task<ActionResult<IEnumerable<DiagnosticMLMechanicalArmReadDTO>>> GetDiagnosticMechanicalArm()
         {
             var diagnostic = await _context.diagnosticMl_mechanicalArm.ToListAsync();
 
