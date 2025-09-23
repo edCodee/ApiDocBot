@@ -1,4 +1,5 @@
 ﻿using Microsoft.ML;
+using Microsoft.Extensions.Configuration;
 
 namespace ApiDocBot.ML_MechanicalARM
 {
@@ -6,29 +7,27 @@ namespace ApiDocBot.ML_MechanicalARM
     {
         private readonly PredictionEngine<PatientDataMechanicalArm, PatientPredictionMechanicalArm> _predictionEngine;
 
-        public MLServiceMechanicalArm()
+        public MLServiceMechanicalArm(IConfiguration configuration)
         {
             var mlContext = new MLContext();
 
-            // obtener la ruta relativa desde donde se ejecuta la app
-            var modelPath = Path.Combine(Directory.GetCurrentDirectory(), "ML_MechanicalARM", "PatientRiskModel_mechanicalarmV3.zip");
+            var modelPathConfig = configuration["MLModel2:Path"];
+            if (string.IsNullOrWhiteSpace(modelPathConfig))
+                throw new ArgumentException("Falta la configuración MLModel2:Path en appsettings.json");
 
-            var model = mlContext.Model.Load(modelPath, out var _);
+            var modelPath = Path.Combine(Directory.GetCurrentDirectory(), modelPathConfig);
+
+            if (!File.Exists(modelPath))
+                throw new FileNotFoundException($"No se encontró el modelo ML en {modelPath}");
+
+            var model = mlContext.Model.Load(modelPath, out _);
             _predictionEngine = mlContext.Model.CreatePredictionEngine<PatientDataMechanicalArm, PatientPredictionMechanicalArm>(model);
         }
 
         public string PredictRiskMechanicalArm(PatientDataMechanicalArm dataMechanicalArm)
         {
-            try
-            {
-                var prediction = _predictionEngine.Predict(dataMechanicalArm);
-                return prediction.PredictedRiskLevel;
-            }
-            catch (Exception ex)
-            {
-                // Aquí atrapamos la excepción real y la propagamos con más detalle
-                throw new InvalidOperationException($"Error en predicción ML: {ex.Message}", ex);
-            }
+            var prediction = _predictionEngine.Predict(dataMechanicalArm);
+            return prediction.PredictedRiskLevel;
         }
     }
 }
