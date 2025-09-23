@@ -2,7 +2,6 @@
 using ApiDocBot.DTO.DiagnosticMLMechanicalArmDTO;
 using ApiDocBot.ML_MechanicalARM;
 using ApiDocBot.Models;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,17 +9,23 @@ namespace ApiDocBot.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class DiagnosticMLMechanicalArmController:ControllerBase
+    public class DiagnosticMLMechanicalArmController : ControllerBase
     {
         private readonly AppDbContext _context;
         private readonly MLServiceMechanicalArm _mlServiceMechanicalArm;
-        public DiagnosticMLMechanicalArmController(AppDbContext context, MLServiceMechanicalArm mlServiceMechanicalArm)
+        private readonly ILogger<DiagnosticMLMechanicalArmController> _logger;
+
+        public DiagnosticMLMechanicalArmController(
+            AppDbContext context,
+            MLServiceMechanicalArm mlServiceMechanicalArm,
+            ILogger<DiagnosticMLMechanicalArmController> logger)
         {
             _context = context;
             _mlServiceMechanicalArm = mlServiceMechanicalArm;
+            _logger = logger;
         }
 
-        //GET: api/diagnosticmlmechanicalarm
+        // GET: api/DiagnosticMLMechanicalArm
         [HttpGet]
         public async Task<ActionResult<IEnumerable<DiagnosticMLMechanicalArmReadDTO>>> GetDiagnosticMLMechanicalArm()
         {
@@ -38,33 +43,6 @@ namespace ApiDocBot.Controllers
             return Ok(diagnosticDTO);
         }
 
-        //POST: api/predict-mechanicaarm
-        //[HttpPost]
-        //public async Task<ActionResult<DiagnosticMLMechanicalArmCreateDTO>> CreateDiagnosticMLMechanicalArm(DiagnosticMLMechanicalArmCreateDTO diagnosticDTO)
-        //{
-        //    var diagnostic = new DiagnosticMLMechanicalArmModel
-        //    {
-        //        diagnosticMlFree_patientProfileFreeId = diagnosticDTO.DiagnosticMLMechanicalArmPatientProfileFreeId,
-        //        diagnosticMlFree_riskLevel = diagnosticDTO.DiagnosticMLMechanicalArmRiskLevel,
-        //        diagnosticMlFree_recommendations = diagnosticDTO.DiagnosticMLMechanicalArmRecomendation,
-        //        diagnosticMlFree_needUrgentPsychologist = diagnosticDTO.DiagnosticMLMechanicalArmNeedUrgenPsychologist,
-        //        diagnosticMlFree_createdAt = DateTime.Now,
-        //    };
-        //    _context.diagnosticMl_mechanicalArm.Add(diagnostic);
-        //    await _context.SaveChangesAsync();
-
-        //    var result = new DiagnosticMLMechanicalArmReadDTO
-        //    {
-        //        DiagnosticMLMechanicalPatientProfileId = diagnostic.diagnosticMlFree_patientProfileFreeId,
-        //        DiagnosticMLMechanicalRiskLevel = diagnostic.diagnosticMlFree_riskLevel,
-        //        DiagnosticMLMechanicalRecomendations = diagnostic.diagnosticMlFree_recommendations,
-        //        DiagnosticMLMechanicalNeedUrgentPsychologist = diagnostic.diagnosticMlFree_needUrgentPsychologist,
-        //        DiagnosticMLMechanicalCreateAt = diagnostic.diagnosticMlFree_createdAt
-        //    };
-
-        //    return CreatedAtAction(nameof(GetDiagnosticMLMechanicalArm), new {id=diagnostic.diagnosticMlFree_id}, result);
-        //}
-
         // POST: api/DiagnosticMLMechanicalArm
         [HttpPost]
         public async Task<ActionResult<DiagnosticMLMechanicalArmReadDTO>> CreateDiagnosticMLMechanicalArm([FromBody] PatientDataMechanicalArm inputData)
@@ -75,12 +53,14 @@ namespace ApiDocBot.Controllers
             string riskLevel;
             try
             {
-                // 1. Predecir riesgo con el modelo ML
-                riskLevel = _mlServiceMechanicalArm.PredictRiskMechanicalArm(inputData);
+                // Usar el método Predict
+                var prediction = _mlServiceMechanicalArm.Predict(inputData);
+                riskLevel = prediction.PredictedRiskLevel;
             }
             catch (Exception ex)
             {
-                return BadRequest($"Error en predicción ML: {ex.Message}");
+                _logger.LogError(ex, "Fallo en PredictRiskMechanicalArm");
+                return StatusCode(500, new { message = "Error interno en ML", detail = ex.Message });
             }
 
             // 2. Recomendaciones según el nivel de riesgo
