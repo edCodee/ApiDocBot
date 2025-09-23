@@ -1,41 +1,25 @@
-﻿using Microsoft.ML;
+﻿using ApiDocBot.ML_MechanicalARM;
+using Microsoft.ML;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
-    public class MLServiceMechanicalArm
-    {
+public class MLServiceMechanicalArm
+{
+    private readonly PredictionEngine<PatientDataMechanicalArm, PatientPredictionMechanicalArm> _predictionEngine;
     public MLServiceMechanicalArm()
-        {
+    {
+        var mlContext=new MLContext();
 
-            var modelPathConfig = configuration["MLModel2:Path"];
-            if (string.IsNullOrWhiteSpace(modelPathConfig))
-                throw new ArgumentException("Falta la configuración MLModel2:Path en appsettings.json");
+        //Obtener la relativa donde se ejecuta la app
+        var modelPath = Path.Combine(Directory.GetCurrentDirectory(), "ML_MechanicalARM", "PatientRiskModel_mechanicalarmV3.zip");
 
-            // Resuelve con ContentRootPath (seguro en local y en Azure)
-            var modelPath = Path.Combine(env.ContentRootPath, modelPathConfig);
+        var model = mlContext.Model.Load(modelPath, out var _);
+        _predictionEngine=mlContext.Model.CreatePredictionEngine<PatientDataMechanicalArm, PatientPredictionMechanicalArm>(model);
+    }
 
-            _logger.LogInformation("Buscando modelo ML en: {path}", modelPath);
-
-            if (!File.Exists(modelPath))
-                throw new FileNotFoundException($"No se encontró el modelo ML en {modelPath}");
-
-            // Cargamos el modelo y también capturamos el schema para inspección
-            using (var fs = File.OpenRead(modelPath))
-            {
-                _mlModel = _mlContext.Model.Load(fs, out _schema);
-            }
-        }
-
-        public PatientPredictionMechanicalArm Predict(PatientDataMechanicalArm input)
-            {
-                // Crear PredictionEngine por petición (es seguro y evita problemas de concurrencia)
-                var engine = _mlContext.Model.CreatePredictionEngine<PatientDataMechanicalArm, PatientPredictionMechanicalArm>(_mlModel);
-                var prediction = engine.Predict(input);
-                return prediction;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al predecir con ML.");
-                throw;
-            }
-        }
+    public string PredictRisk(PatientDataMechanicalArm data)
+    {
+        var prediction=_predictionEngine.Predict(data);
+        return prediction.PredictedRiskLevel;
     }
 }
+
