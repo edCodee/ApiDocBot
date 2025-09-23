@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace ApiDocBot.Controllers
 {
     [ApiController]
-    [Route("/api[controller]")]
+    [Route("api/[controller]")]
     public class DiagnosticMLMechanicalArmController:ControllerBase
     {
         private readonly AppDbContext _context;
@@ -65,15 +65,23 @@ namespace ApiDocBot.Controllers
         //    return CreatedAtAction(nameof(GetDiagnosticMLMechanicalArm), new {id=diagnostic.diagnosticMlFree_id}, result);
         //}
 
-        // POST: api/diagnosticmlmechanicalarm
+        // POST: api/DiagnosticMLMechanicalArm
         [HttpPost]
         public async Task<ActionResult<DiagnosticMLMechanicalArmReadDTO>> CreateDiagnosticMLMechanicalArm([FromBody] PatientDataMechanicalArm inputData)
         {
             if (inputData == null)
                 return BadRequest("Los datos del paciente son requeridos.");
 
-            // 1. Predecir riesgo con el modelo ML
-            var riskLevel = _mlServiceMechanicalArm.PredictRiskMechanicalArm(inputData);
+            string riskLevel;
+            try
+            {
+                // 1. Predecir riesgo con el modelo ML
+                riskLevel = _mlServiceMechanicalArm.PredictRiskMechanicalArm(inputData);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error en predicción ML: {ex.Message}");
+            }
 
             // 2. Recomendaciones según el nivel de riesgo
             var recommendations = riskLevel switch
@@ -107,7 +115,6 @@ namespace ApiDocBot.Controllers
             // 4. Guardar en la tabla
             var diagnostic = new DiagnosticMLMechanicalArmModel
             {
-                diagnosticMlFree_patientProfileFreeId = inputData.PatientAge > 0 ? 1 : 0, // ⚠️ Aquí deberías mapear el perfil real del paciente
                 diagnosticMlFree_riskLevel = riskLevel,
                 diagnosticMlFree_recommendations = recommendations,
                 diagnosticMlFree_needUrgentPsychologist = needUrgent,
