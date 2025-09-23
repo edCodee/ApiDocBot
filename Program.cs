@@ -108,7 +108,11 @@ builder.Services.AddHealthChecks()
 
 builder.Services.AddControllers();
 
+//Aqui inyectamos el servicio de ml1
 builder.Services.AddSingleton<MLService>();
+
+//Aquí inyectamos el servicio de ML2
+builder.Services.AddSingleton<MLServiceMechanicalArm>();
 
 #endregion
 
@@ -121,7 +125,7 @@ builder.WebHost.ConfigureKestrel(options =>
 });
 
 //Escuchar en cualquier puerto como lo exige Azure
-builder.WebHost.UseUrls("http://+:80");
+//builder.WebHost.UseUrls("http://+:80");
 
 #endregion
 
@@ -153,15 +157,15 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 // 4.6 Swagger solo en desarrollo
-//if (app.Environment.IsDevelopment())
-//{
-//    app.UseSwagger();
-//    app.UseSwaggerUI(c =>
-//    {
-//        c.SwaggerEndpoint("/swagger/v1/swagger.json", "API DocBot v1");
-//        //c.RoutePrefix = string.Empty; // sirve swagger en la raíz
-//    });
-//}
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "API DocBot v1");
+        //c.RoutePrefix = string.Empty; // sirve swagger en la raíz
+    });
+}
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>
