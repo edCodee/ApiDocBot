@@ -1,5 +1,4 @@
 using ApiDocBot.Data;
-using ApiDocBot.ML_MechanicalARM;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -110,8 +109,6 @@ builder.Services.AddHealthChecks()
 builder.Services.AddControllers();
 
 builder.Services.AddSingleton<MLService>();
-builder.Services.AddSingleton<MLServiceMechanicalArm>();
-
 
 #endregion
 

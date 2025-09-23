@@ -27,7 +27,7 @@
 		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	</Content>
 
-	<Content Include="ML_MechanicalARM\PatientRiskModel_mechanicalarmV3.zip">
+	<Content Include="ML_MechanicalARM\PatientRiskModel_mechanicalArmV4.zip">
     		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
   	</Content>
 

@@ -5,7 +5,7 @@ public class MLService
 {
     private readonly PredictionEngine<PatientData, PatientPrediction> _predictionEngine;
 
-    public MLService()
+    public MLService ()
     {
         var mlContext = new MLContext();
 
