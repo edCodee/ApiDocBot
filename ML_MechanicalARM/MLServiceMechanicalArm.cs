@@ -1,23 +1,9 @@
 ﻿using Microsoft.ML;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using System.IO;
-using Microsoft.ML.Data;
-
-namespace ApiDocBot.ML_MechanicalARM
-{
     public class MLServiceMechanicalArm
     {
-        private readonly MLContext _mlContext;
-        private readonly ITransformer _mlModel;
-        private readonly DataViewSchema _schema;
-        private readonly ILogger<MLServiceMechanicalArm> _logger;
-
-        public MLServiceMechanicalArm(IConfiguration configuration, IWebHostEnvironment env, ILogger<MLServiceMechanicalArm> logger)
+    public MLServiceMechanicalArm()
         {
-            _logger = logger;
-            _mlContext = new MLContext();
 
             var modelPathConfig = configuration["MLModel2:Path"];
             if (string.IsNullOrWhiteSpace(modelPathConfig))
@@ -36,15 +22,9 @@ namespace ApiDocBot.ML_MechanicalARM
             {
                 _mlModel = _mlContext.Model.Load(fs, out _schema);
             }
-
-            // Log del schema de entrada para validar columnas
-            var columnNames = string.Join(",", _schema.Select(c => c.Name));
-            _logger.LogInformation("Modelo cargado correctamente. Schema de columnas: {cols}", columnNames);
         }
 
         public PatientPredictionMechanicalArm Predict(PatientDataMechanicalArm input)
-        {
-            try
             {
                 // Crear PredictionEngine por petición (es seguro y evita problemas de concurrencia)
                 var engine = _mlContext.Model.CreatePredictionEngine<PatientDataMechanicalArm, PatientPredictionMechanicalArm>(_mlModel);
