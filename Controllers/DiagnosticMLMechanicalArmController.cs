@@ -1,5 +1,6 @@
 ﻿using ApiDocBot.Data;
 using ApiDocBot.DTO.DiagnosticMLMechanicalArmDTO;
+using ApiDocBot.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -32,6 +33,33 @@ namespace ApiDocBot.Controllers
                 DiagnosticMLMechanicalCreateAt = f.diagnosticMlFree_createdAt
             });
             return Ok(diagnosticDTO);
+        }
+
+        //POST: api/predict-mechanicaarm
+        [HttpPost]
+        public async Task<ActionResult<DiagnosticMLMechanicalArmCreateDTO>> CreateDiagnosticMLMechanicalArm(DiagnosticMLMechanicalArmCreateDTO diagnosticDTO)
+        {
+            var diagnostic = new DiagnosticMLMechanicalArmModel
+            {
+                diagnosticMlFree_patientProfileFreeId = diagnosticDTO.DiagnosticMLMechanicalArmPatientProfileFreeId,
+                diagnosticMlFree_riskLevel = diagnosticDTO.DiagnosticMLMechanicalArmRiskLevel,
+                diagnosticMlFree_recommendations = diagnosticDTO.DiagnosticMLMechanicalArmRecomendation,
+                diagnosticMlFree_needUrgentPsychologist = diagnosticDTO.DiagnosticMLMechanicalArmNeedUrgenPsychologist,
+                diagnosticMlFree_createdAt = DateTime.Now,
+            };
+            _context.diagnosticMl_mechanicalArm.Add(diagnostic);
+            await _context.SaveChangesAsync();
+
+            var result = new DiagnosticMLMechanicalArmReadDTO
+            {
+                DiagnosticMLMechanicalPatientProfileId = diagnostic.diagnosticMlFree_patientProfileFreeId,
+                DiagnosticMLMechanicalRiskLevel = diagnostic.diagnosticMlFree_riskLevel,
+                DiagnosticMLMechanicalRecomendations = diagnostic.diagnosticMlFree_recommendations,
+                DiagnosticMLMechanicalNeedUrgentPsychologist = diagnostic.diagnosticMlFree_needUrgentPsychologist,
+                DiagnosticMLMechanicalCreateAt = diagnostic.diagnosticMlFree_createdAt
+            };
+
+            return CreatedAtAction(nameof(GetDiagnosticMLMechanicalArm), new {id=diagnostic.diagnosticMlFree_id}, result);
         }
     }
 }
