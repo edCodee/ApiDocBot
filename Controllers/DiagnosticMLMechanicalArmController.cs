@@ -1,6 +1,8 @@
 ﻿using ApiDocBot.Data;
 using ApiDocBot.DTO.DiagnosticMlFreeDTO;
 using ApiDocBot.DTO.DiagnosticMLMechanicalArmDTO;
+using ApiDocBot.ML_MechanicalARM;
+using ApiDocBot.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -38,5 +40,133 @@ namespace ApiDocBot.Controllers
             });
             return Ok(diagnosticDTO);
         }
+
+        //Post: api/Diagnosticmechanicalarm
+        //[HttpPost]
+        //public async Task<ActionResult<DiagnosticMLMechanicalArmCreateDTO>> CreateDiagnosticMechanicalArm(DiagnosticMLMechanicalArmCreateDTO diagnosticDTO)
+        //{
+        //    var diagnostic = new DiagnosticMLMechanicalArmModel
+        //    {
+        //        diagnosticMlFree_patientProfileFreeId = diagnosticDTO.DiagnosticMLMechanicalArmPatientProfileFreeId,
+        //        diagnosticMlFree_riskLevel = diagnosticDTO.DiagnosticMLMechanicalArmRiskLevel,
+        //        diagnosticMlFree_recommendations = diagnosticDTO.DiagnosticMLMechanicalArmRecomendation,
+        //        diagnosticMlFree_needUrgentPsychologist = diagnosticDTO.DiagnosticMLMechanicalArmNeedUrgenPsychologist,
+        //        diagnosticMlFree_createdAt = diagnosticDTO.DiagnosticMLMechanicalArmCreateAt
+        //    };
+        //    _context.diagnosticMl_mechanicalArm.Add(diagnostic);
+        //    await _context.SaveChangesAsync();
+
+        //    var result = new DiagnosticMLMechanicalArmReadDTO
+        //    {
+        //        DiagnosticMLMechanicalId = diagnostic.diagnosticMlFree_id,
+        //        DiagnosticMLMechanicalPatientProfileId = diagnostic.diagnosticMlFree_patientProfileFreeId,
+        //        DiagnosticMLMechanicalRiskLevel = diagnostic.diagnosticMlFree_riskLevel,
+        //        DiagnosticMLMechanicalRecomendations = diagnostic.diagnosticMlFree_recommendations,
+        //        DiagnosticMLMechanicalNeedUrgentPsychologist = diagnostic.diagnosticMlFree_needUrgentPsychologist,
+        //        DiagnosticMLMechanicalCreateAt = diagnostic.diagnosticMlFree_createdAt
+        //    };
+
+        //    return CreatedAtAction(nameof(GetDiagnosticMechanicalArm), new { id = diagnostic.diagnosticMlFree_id }, result);
+        //}
+
+        [HttpPost]
+        public async Task<ActionResult<DiagnosticMLMechanicalArmCreateDTO>> CreateDiagnosticMechanicalArm(DiagnosticMLMechanicalArmCreateDTO diagnosticDTO)
+        {
+            // 1. Validar que exista el perfil del paciente
+            var profileExists = await _context.patient_profile_free
+                .AnyAsync(p => p.patientProfileFree_id == diagnosticDTO.DiagnosticMLMechanicalArmPatientProfileFreeId);
+
+            if (!profileExists)
+                return BadRequest($"El PatientProfileId {diagnosticDTO.DiagnosticMLMechanicalArmPatientProfileFreeId} no existe en la base de datos.");
+
+            // 2. Crear el diagnóstico
+            var diagnostic = new DiagnosticMLMechanicalArmModel
+            {
+                diagnosticMlFree_patientProfileFreeId = diagnosticDTO.DiagnosticMLMechanicalArmPatientProfileFreeId,
+                diagnosticMlFree_riskLevel = diagnosticDTO.DiagnosticMLMechanicalArmRiskLevel,
+                diagnosticMlFree_recommendations = diagnosticDTO.DiagnosticMLMechanicalArmRecomendation,
+                diagnosticMlFree_needUrgentPsychologist = diagnosticDTO.DiagnosticMLMechanicalArmNeedUrgenPsychologist,
+                diagnosticMlFree_createdAt = diagnosticDTO.DiagnosticMLMechanicalArmCreateAt
+            };
+
+            _context.diagnosticMl_mechanicalArm.Add(diagnostic);
+            await _context.SaveChangesAsync();
+
+            // 3. Mapear a DTO de respuesta
+            var result = new DiagnosticMLMechanicalArmReadDTO
+            {
+                DiagnosticMLMechanicalId = diagnostic.diagnosticMlFree_id,
+                DiagnosticMLMechanicalPatientProfileId = diagnostic.diagnosticMlFree_patientProfileFreeId,
+                DiagnosticMLMechanicalRiskLevel = diagnostic.diagnosticMlFree_riskLevel,
+                DiagnosticMLMechanicalRecomendations = diagnostic.diagnosticMlFree_recommendations,
+                DiagnosticMLMechanicalNeedUrgentPsychologist = diagnostic.diagnosticMlFree_needUrgentPsychologist,
+                DiagnosticMLMechanicalCreateAt = diagnostic.diagnosticMlFree_createdAt
+            };
+
+            return CreatedAtAction(nameof(GetDiagnosticMechanicalArm), new { id = diagnostic.diagnosticMlFree_id }, result);
+        }
+
+
+        // POST: api/DiagnosticMLMechanicalArm/predict
+        [HttpPost("predict")]
+        public async Task<ActionResult<DiagnosticMLMechanicalArmReadDTO>> PredictAndCreateDiagnosticMechanicalArm([FromBody] PatientDataMechanicalArm patientData, [FromQuery] int patientProfileId)
+        {
+            if (patientData == null)
+                return BadRequest("Debe enviar los datos del paciente.");
+
+            // 1. Ejecutar predicción usando ML
+            var riskLevel = _mlService.PredictRisk(patientData);
+
+            // 2. Generar recomendaciones según nivel de riesgo
+            var recommendations = riskLevel switch
+            {
+                "Alto" =>
+                    "Se detecta un alto nivel de riesgo. Es fundamental programar una cita con un psicólogo lo antes posible. " +
+                    "Se recomienda reforzar la tolerancia a la frustración y mantener un acompañamiento cercano durante las actividades.",
+
+                "Moderado" =>
+                    "Se detecta un nivel moderado de riesgo. Se recomienda trabajar en la planificación y perseverancia con actividades guiadas. " +
+                    "El seguimiento constante permitirá prevenir mayores dificultades.",
+
+                "Bajo" =>
+                    "El nivel de riesgo es bajo. Se sugiere continuar con las prácticas actuales, fomentando la precisión motriz fina " +
+                    "y la coordinación óculo-manual a través de ejercicios recreativos.",
+
+                _ =>
+                    "No se pudo determinar una recomendación específica. Revise los datos ingresados e intente nuevamente."
+            };
+
+            // 3. Determinar si necesita psicólogo urgente
+            var needUrgent = riskLevel == "Alto";
+
+            // 4. Crear entidad para guardar en BD
+            var diagnostic = new DiagnosticMLMechanicalArmModel
+            {
+                diagnosticMlFree_patientProfileFreeId = patientProfileId,
+                diagnosticMlFree_riskLevel = riskLevel,
+                diagnosticMlFree_recommendations = recommendations,
+                diagnosticMlFree_needUrgentPsychologist = needUrgent,
+                diagnosticMlFree_createdAt = DateTime.Now
+            };
+
+            _context.diagnosticMl_mechanicalArm.Add(diagnostic);
+            await _context.SaveChangesAsync();
+
+            // 5. Devolver resultado al frontend
+            var result = new DiagnosticMLMechanicalArmReadDTO
+            {
+                DiagnosticMLMechanicalId = diagnostic.diagnosticMlFree_id,
+                DiagnosticMLMechanicalPatientProfileId = diagnostic.diagnosticMlFree_patientProfileFreeId,
+                DiagnosticMLMechanicalRiskLevel = diagnostic.diagnosticMlFree_riskLevel,
+                DiagnosticMLMechanicalRecomendations = diagnostic.diagnosticMlFree_recommendations,
+                DiagnosticMLMechanicalNeedUrgentPsychologist = diagnostic.diagnosticMlFree_needUrgentPsychologist,
+                DiagnosticMLMechanicalCreateAt = diagnostic.diagnosticMlFree_createdAt
+            };
+
+            return CreatedAtAction(nameof(GetDiagnosticMechanicalArm), new { id = diagnostic.diagnosticMlFree_id }, result);
+        }
+
+
+
     }
 }
