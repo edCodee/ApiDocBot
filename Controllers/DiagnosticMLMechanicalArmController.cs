@@ -167,6 +167,34 @@ namespace ApiDocBot.Controllers
         }
 
 
+        // GET: api/diagnosticcontroller/by-profile/{profileId}
+        [HttpGet("by-profile/{profileId}")]
+        public async Task<ActionResult<IEnumerable<DiagnosticMLMechanicalArmReadDTO>>> GetDiagnosticMechanicalArmByProfile(int profileId)
+        {
+            // 1. Filtrar por el PatientProfileFreeId
+            var diagnostics = await _context.diagnosticMl_mechanicalArm
+                .Where(d => d.diagnosticMlFree_patientProfileFreeId == profileId)
+                .ToListAsync();
+
+            // 2. Si no hay registros, devolver 404
+            if (diagnostics == null || diagnostics.Count == 0)
+                return NotFound($"No existen diagnósticos para el perfil {profileId}.");
+
+            // 3. Mapear a DTO
+            var diagnosticDTOs = diagnostics.Select(f => new DiagnosticMLMechanicalArmReadDTO
+            {
+                DiagnosticMLMechanicalId = f.diagnosticMlFree_id,
+                DiagnosticMLMechanicalPatientProfileId = f.diagnosticMlFree_patientProfileFreeId,
+                DiagnosticMLMechanicalRiskLevel = f.diagnosticMlFree_riskLevel,
+                DiagnosticMLMechanicalRecomendations = f.diagnosticMlFree_recommendations,
+                DiagnosticMLMechanicalNeedUrgentPsychologist = f.diagnosticMlFree_needUrgentPsychologist,
+                DiagnosticMLMechanicalCreateAt = f.diagnosticMlFree_createdAt
+            });
+
+            return Ok(diagnosticDTOs);
+        }
+
+
 
     }
 }
