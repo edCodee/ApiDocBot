@@ -112,5 +112,32 @@ namespace ApiDocBot.Controllers
             return CreatedAtAction(nameof(GetConcentrarionMetrics),
                 new { id = concetration.concentrationMetrics_id }, result);
         }
+
+        // GET: api/concetrationmetric/by-profile/{profileId}
+        [HttpGet("by-profile/{profileId}")]
+        public async Task<ActionResult<IEnumerable<ConcetrationMetricReadDTO>>> GetConcentrationMetricsByProfile(int profileId)
+        {
+            // 1. Filtrar por el patientProfileFreeId
+            var concetration = await _context.concentration_metrics
+                .Where(f => f.concentrationMetrics_patientProfileFreeId == profileId)
+                .ToListAsync();
+
+            // 2. Si no hay registros, devolver 404
+            if (concetration == null || concetration.Count == 0)
+                return NotFound($"No existen métricas de concentración para el perfil {profileId}.");
+
+            // 3. Mapear a DTO
+            var concetrationDTO = concetration.Select(f => new ConcetrationMetricReadDTO
+            {
+                ConcetrationMetricId = f.concentrationMetrics_id,
+                ConcetrationMetricPatientProfileFreeId = f.concentrationMetrics_patientProfileFreeId,
+                ConcetrationMetricDurationMs = f.concentrationMetrics_durationMs,
+                ConcetrationMetricPercentMoving = f.concentrationMetrics_percentMoving,
+                ConcetrationMetricAvgMovement = f.concentrationMetrics_avgMovement,
+                ConcetrationMetricCreateAt = f.concentrationMetrics_createdAt
+            });
+
+            return Ok(concetrationDTO);
+        }
     }
 }
